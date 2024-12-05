@@ -1,0 +1,278 @@
+#include "crosswordfunc.h"
+
+//create puzzle board
+void makePuzzle(char puzzle[][MAXWORD]){
+  printf("+");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("-");
+  }
+  printf("+");
+  printf("\n");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("|");
+    for(int j = 0; j < MAXWORD; j++){
+      if((puzzle[i][j]) != '.'){
+        printf(" ");
+      }
+      else{
+        printf("#");
+      }
+    }
+    printf("|");
+    printf("\n");
+  }
+  printf("+");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("-");
+  }
+  printf("+\n");
+}
+
+//create solution board
+void makeSolution(char solution[][MAXWORD]){
+  printf("+");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("-");
+  }
+  printf("+");
+  printf("\n");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("|");
+    for(int j = 0; j < MAXWORD; j++){
+      printf("%c", solution[i][j]);
+    }
+    printf("|");
+    printf("\n");
+  }
+  printf("+");
+  for(int i = 0; i < MAXWORD; i++){
+    printf("-");
+  }
+  printf("+\n");
+}
+
+void to_upper(char *word){
+  for(int i = 0; i <strlen(word); i++){
+    word[i] = toupper(word[i]);
+    printf("%c", word[i]);
+  }
+  printf("\n");
+}
+
+//read in word from user for interactive mode
+int getWords(WORD words[MAXWORDS]){
+  printf("\nAnagram Crosword Puzzle Generator\n----------------------------------\n");
+  char word[MAXWORD];
+  int index = 0;
+  bool too_long = false;
+  printf("\nplease enter a list of words:\n");
+  while(index < MAXWORDS){
+    too_long = false;
+    fgets(word, MAXWORD, stdin);, 
+    if(word[strlen(word)-1] != '\n'){
+      too_long = true;
+      printf("sorry but this word is too long\n");
+    }
+    word[strlen(word)-1] = '\0';
+
+    if(strcmp(word, ".") == 0){
+      break;
+    }
+    
+    if(strlen(word) <2){
+      printf("sorry but this word is too short\n");
+    }
+    int allLetters = 0; 
+    if(strlen(word) >= 2 && too_long == false){
+      //make sure that all letters
+      for(int i = 0; i <strlen(word); i++){
+        if(isalpha(word[i]) == 0){
+	  allLetters = 1;
+	}
+      }
+      if(allLetters != 1){
+        strcpy(words[index].word, word);
+	index++;
+	to_upper(words[index-1].word);
+	printf("%s", words[index].word);
+	words[index].x = -1;
+	words[index].y = -1;
+	words[index].direction = true;
+      }
+      else{
+        printf("sorry but characters under than letters are in this word\n");
+      }
+    }
+  }
+  printf("\n");
+
+  return index;
+}
+
+void lengthOrder(WORD words[MAXWORDS], int numWords){
+  char temp[MAXWORD];
+  for(int i = 0; i < (numWords-1); i++){
+    for(int j = 0; j < (numWords-i-1); j++){
+      if(strlen(words[j].word) < strlen(words[j+1].word)){
+        strcpy(temp, words[j].word);
+	strcpy(words[j].word, words[j+1].word);
+	strcpy(words[j+1].word, temp);
+        
+      }
+    }
+  }
+}
+
+int readFile(char filename[MAXWORDS], WORD words[MAXWORDS]){
+  FILE *fp = fopen(filename, "r");
+  int index = 0;
+  int wordcount = 0;
+ // char words[MAXWORDS][MAXWORD];
+  char word[MAXWORD];
+  while(1){
+    bool too_long = false;
+    fgets(word, MAXWORD, fp);
+    if(feof(fp)) break;
+    else{
+     // fgets(word, MAXWORD, fp);
+      if(word[strlen(word)-1] != '\n'){
+        too_long = true;
+        printf("%s: sorry but this word is too long\n", word);
+      }
+      word[strlen(word)-1] = '\0';
+
+      if(strcmp(word, ".") == 0){
+        break;
+      }
+    
+      if(strlen(word) <2){
+        printf("%s: sorry but this word is too short\n", word);
+      }
+    
+      if(strlen(word) >= 2 && too_long == false){
+        int allLetters = 0;
+        //make sure that all letters
+        for(int i = 0; i <strlen(word); i++){
+          if(isalpha(word[i]) == 0){
+	    allLetters = 1;
+	  }
+        }
+        if(allLetters != 1){
+          strcpy(words[index].word, word);
+  	  index++;
+	  to_upper(words[index-1].word);
+	  wordcount++;
+        }
+        else{
+          printf("%s: sorry but characters under than letters are in this word\n", word);
+        } 
+      }
+      index = 0;
+    }
+    if(wordcount == 20){
+      break;
+    }
+  }
+
+  return wordcount;
+}
+
+void placeFirst(WORD words[MAXWORDS], char solution[MAXWORDS][MAXWORD]){
+  int length = strlen(words[0].word);
+  int compare = (MAXWORD - length) / 2;
+
+  int row = 7;
+  int column = compare;
+  int index = 0;
+  for(int i = 0; i < length; i++){
+    solution[row][column] = words[0].word[index];
+    column++;
+    index++;
+  }
+  makePuzzle(solution);
+  makeSolution(solution);
+}
+
+void shuffleWords(WORD clues[MAXWORDS], int numWords, WORD words[MAXWORDS]){
+  char temp[MAXWORD];
+  for(int i = 0; i < numWords; i++){
+    strcpy(temp, words[i].word);
+    strfry(temp);
+    strcpy(clues[i].word, temp);
+  }
+}
+
+
+//displays clues function
+
+
+//board
+void placeWords(WORD words[MAXWORDS], int numWords, WORD notPlaced[MAXWORDS], char solution[MAXWORDS][MAXWORD]){
+  
+  int result = 0;
+  int direction = 0; //0 = vertical, 1 = horizontal
+  for(int i = 0; i < numWords-1; i++){
+    int length1 = strlen(words[i].word);
+    int length2 = strlen(words[i+1].word);
+    for(int letter = 0; letter < length1; letter++){
+      char letter1 = words[i].word[letter];
+      //printf("letter from word1: %c\n", letter1);
+      for(int index = 0; index < length2; index++){
+        char letter2 = words[i+1].word[index];
+	//printf("letter from word2: %c\n", letter2);
+	if(letter1 == letter2){
+	  printf("found match in %s, %s, %c\n", words[i].word, words[i+1].word, letter2);
+	  result = -1;
+	  //place word
+          if(direction == 0){
+	    int row = words[i].x;
+	    int column = words[i].y;
+	    column = column + i; //column stays constant
+	    int rowstart = row - index;
+	    int rowend = row + index;
+	    int temp = index;
+	    for(int rowplace = rowstart; rowplace < rowend; rowplace++){
+              solution[rowplace][column] = words[i+1].word[temp];
+	      temp++;
+	    }
+	    makePuzzle(solution);
+	    makeSolution(solution);
+
+	    direction = 1;
+          }
+	  else{
+	    int row = words[i].x;
+	    int column = words[i].y;
+	    row = row + i; //row stays constant
+	    int temp = index;
+	    int colstart = column - index;
+	    int colend = column + index;
+	    for(int colplace = colstart; colplace < colend; colplace++){
+	      solution[row][colplace] = words[i+1].word[temp];
+	      temp++;
+	    }
+	    makePuzzle(solution);
+	    makeSolution(solution);
+
+            direction = 0;
+	  }
+          break;
+	}
+	else{
+	  result++;
+	}
+      }
+      /*
+      if(result < 0){
+        break;
+      }
+      if(result >= length2){
+        strcpy(notPlaced[i].word, words[i+1].word);
+        printf("in not placed: %s\n", words[i+1].word);
+	break;
+      }
+      */
+    }
+    result = 0;
+  }
+}
