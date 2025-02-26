@@ -1,0 +1,32 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Specific Styles for Sections */
+header {
+    background-color: #007bff;
+}
+
+footer {
+    background-color: #343a40;
+}
+
+/* Bootstrap Utility Classes */
+.container {
+    max-width: 800px;
+    margin: auto;
+}
